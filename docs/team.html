@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "Dd6RKr1vXOs", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 RM55,000,000 • 4-Storey Mansion @ Taman Duta\n🏡 Comment “CASTLE” and I’ll DM you the full details!\n\n✨ 43,000 sq ft land | Approx. 40,000 sq ft built-up\nWhy buy a bungalow, when you could own a castle?\n🌟\n✅ 7+3 bedrooms, 10 bathrooms\n✅ Private pool & lift\n✅ Indoor pickleball court\n✅ Parking for 17 cars\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "Kenapa beli bungkus apabili kamu dapat perkara melhor Evis meluncurikan keras bising dan lemon 43.000 square feet diіє r Syurga ع س liqu t s mang insgesamt 10 bilik penila��는 eur Dan touden menalami海 Dan lewat Codapel아아 Wonkas w 처음 Parkangan Romana muncul dengan berat 계 Canadian K thinksistsya di bawah darah tbsp mineral nampak di bawah kebentuk. D saharmya derang sewajah laughs dan muah kedai sarapanun ter Enoughened Tsami", "brk": "Hook类型: 反常识\n结构: 豪宅标价吸睛 → 降维对比痛点 → 极致卖点罗列 → 评论留资引导\n为什么火: 用RM55M天价城堡反衬常规别墅，极度稀缺的奢华设施激发了阶层好奇与向往。\n改编角度: 对标吉隆坡其他超高净值地段，用“买XX不如买城堡”的降维对比话术刺激富豪买家。", "my": "为什么买普通洋房，不如看看真正的超大独立洋房？\n\n很多人以为，要在马来西亚找一处真正适合三代同堂、还能同时兼顾退休生活和资产配置的大空间，一定要花上千万，或者在市区里找那些车水马龙、完全没有隐私的旧房子。\n\n其实完全不是这样，真正理想的居住空间，重点在于地段要离机场近、空间要足够大，还要能真正住得舒服。\n\n第一个方法，看地段。\n选择离机场只要约25分钟车程的地方，这样你经常出国的时候，不管是接送机还是赶飞机，都会非常方便，省去塞车的时间。\n第二个方法，看空间尺度。\n找那种拥有30,000平方尺超大地段、8000平方尺建筑面积的独立洋房，这样的尺寸，长辈退休散步、孩子在家里跑动，空间都绰绰有余。\n第三个方法，看整体的性价比。\n现在这套位于Nilai Spring的Luxury Bungalow，价格已经从原价RM4.8 million，调整到了RM3.8 million，用更合理的预算，就能买到真正属于全家人的宽敞空间。\n\n以前大家找退休房，常常在市区跟郊区之间纠结很久，不是房子太小不够住，就是地点太远出入不方便。\n换成这种大空间、好地段的独立洋房以后，既能满足三代同堂的居住需求，又能兼顾经常出国的便利性。\n\n如果你也想了解这套RM3.8 million的Nilai Spring Luxury Bungalow，现在就私信我，获取这套30,000平方尺独立洋房的完整资料。", "tags": "", "bait": true, "type": "Video", "likes": 25181, "comments": 303, "er": 333.25, "followers": 7647, "date": "2026-09-30", "url": "https://www.instagram.com/p/Dd6RKr1vXOs/", "video": true, "ratio": 0, "score": 341.18, "status": "未处理", "x": 82.5}, {"id": "Dd857_GP_n-", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 From RM26.2mil • New Bungalows @ Bukit Tunku\n🏡 Comment “TUNKU” and I’ll DM you the full details!\n\n✨ 10,201–15,000 sq ft land | 11,260–13,272 sq ft built-up | Freehold\nSeven homes, one gated enclave, minutes from KLCC.\n🌟\n✅ Private pool & lift\n✅ 8–10 bedrooms\n✅ 5–7 car parks\n✅ KL skyline views (select units)\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "7 bangunan baru yang baru di dalam satu perang di Bukitunggu Setiap rumah berada di 10,000 hingga 15,000 sq. atau 3 jenis land Dengan 11,000 hingga 13,000 sq. yang dibina di 3 hingga 4 tinggi Apa yang diperlukan kepada saya adalah bagaimana setiap orang adalah berguna untuk hidup keluarga Dalam hidup sendiri, sebuah kawasan yang berlaku di setiap jenis Dan sebuah kawasan di luar belakang untuk 5-7 kawasan 2 kawasan tinggi, kawasan kawasan yang panjang dan menakjubkan 1 bilik fungsi, dan 10 bilik bilik Cukup untuk 3 jenis di dalam satu ruang Dengan satu-satunya ruang yang dibuat di luar belakang Dari beberapa unit, kawasan KL Skyline berada di atas 3 tinggi Kawasan KLCC, tetapi jalan tinggi, kawasan kawasan yang panjang dan menakjubkan Bukitunggu baru berada di dalam satu perang di Bukitunggu, sangat berjalan", "brk": "Hook类型: 身份共鸣\n结构: 豪宅稀缺地段总览 → 奢华核心配置展示 → 评论区留资引流\n为什么火: 锁定富人区顶级豪宅痛点，用稀缺性与震撼实景引发向往并精准钓鱼\n改编角度: 聚焦吉隆坡另一个富人区，突出“限额私密”与“独特景观”制造稀缺感", "my": "花 RM3.8 million，买一间 30000 平方尺地段的独立洋房。\n\n很多人以为，要在吉隆坡附近找一间够大、三代同堂住得舒服的房子，只能去看那些挤在一起的排屋，或者地段很小的半独立。\n\n其实不是这样的，真正的问题在于，市面上很多大房子的地段不够安静，或者离机场太远，每次出国的家庭都要花很多时间在路上。\n\n如果你也打算在马来西亚退休，或者想找一间适合三代同堂的独立洋房，其实可以看 Nilai 地区。\n\n第一步，看地段大小。\n\n选择地段有 30000 平方尺的空间，建筑面积有 8000 平方尺的房子。\n\n这样三代同堂住在一起时，每个人才有足够的私人空间，不会觉得拥挤。\n\n第二步，看交通距离。\n\n选择离机场只要约 25 分钟车程的地点。\n\n这样经常出国的家庭，从家里出发去机场才不会花太多时间在塞车上。\n\n第三步，看整体环境。\n\n选择像 Nilai Spring Luxury Bungalow 这样的高端独立洋房项目。\n\n这里有独立的地段和隐私，环境安静，非常适合退休人士居住。\n\n以前看房子时，总是担心地点太偏远，或者房子不够大，一家人住得不舒服。\n\n用对方向以后，找到地段够大、交通方便的独立洋房，三代同堂的生活才会真正轻松。\n\n如果你也想了解这间 RM3.8 million 的 Nilai Spring Luxury Bungalow，现在就私信我，我把项目的详细资料发给你。", "tags": "", "bait": true, "type": "Video", "likes": 2617, "comments": 67, "er": 35.1, "followers": 7647, "date": "2026-10-01", "url": "https://www.instagram.com/p/Dd857_GP_n-/", "video": true, "ratio": 0, "score": 36.85, "status": "未处理", "x": 8.9}, {"id": "DfHVRu0if-X", "tracker": "Property 竞对", "competitor": "tina_propertymy", "caption": "招聘啦！嘻嘻～ （不是卖bubble wrap）\n\n只需要intern，full time 暂时满啦✨\n\n你对拍摄、剪辑、甚至是AI有兴趣？\n你有可能是我们要的人🥸\n\n🎬后期制作\n✍️前期准备&拍摄\n✨有portfolio优先考虑\n\n#hiring #intern #videoproduction #ai #advertising\n\nshow一些btsss给你们\n\nHAHAHAHHAHAHAHAHAH 这个abang很好笑\n\n加入我的团队 年入过完不是梦☁️", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 招聘反转 → 岗位需求展示 → 幕后花岗搞笑 → 团队愿景诱惑\n为什么火: 用幽默排压反差和“年入过万不是梦”的画饼反讽引发围观\n改编角度: 结合地产行业痛点，招募地产经纪或短视频剪辑时用搞笑幕后反差吸睛", "my": "想在马来西亚找一间真正能三代同堂的独立洋房，其实真的不用看太多间。\n\n很多人以为，要在 Nilai 找一间空间足够大的高端洋房，一定要花好几百万去买那些地段小、建筑挤的排屋或半独立，甚至觉得根本不可能找到符合预算的理想面积。\n\n其实完全不是这样，关键在于你有没有看对真正带超大面积的独立洋房项目。\n\n第一步，先看土地面积。你必须要找那种地段有 30,000 平方尺的独立洋房，这样三代同堂住在一起才不会觉得拥挤，每个人都有足够的私人活动空间。\n\n第二步，看建筑本身的实际大小。像 Nilai Spring Luxury Bungalow 这种拥有 8,000 平方尺建筑面积的洋房，不管是长辈散步还是小孩奔跑，空间都绝对足够，不用担心空间不够用。\n\n第三步，看地段的便利性。选择靠近机场大约 25 分钟车程的地点，对于经常需要出国出差的家庭来说，能省下非常多在路上塞车的时间。\n\n以前很多家庭想找大房子，总是看到一半就放弃，觉得不是预算太高就是地点不合适；现在只要看准 Nilai Spring Luxury Bungalow，就能直接拥有大空间和便利的交通。\n\n如果你刚好在看马来西亚的高端房产，现在就可以直接私信我，了解这间售价 RM3.8 million、地段 30,000 平方尺的 Nilai Spring Luxury Bungalow 的详细资料。", "tags": "hiring, intern, videoproduction, ai, advertising", "bait": false, "type": "Carousel", "likes": 265, "comments": 2, "er": 12.25, "followers": 2179, "date": "2026-10-30", "url": "https://www.instagram.com/p/DfHVRu0if-X/", "video": false, "ratio": 0, "score": 12.44, "status": "未处理", "x": 0}, {"id": "De_AX_sEgVy", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautiful house nestled in an exclusive neighbourhood of Setiawangsa, KL. Featuring 3 bedrooms and 4 bathrooms, this charming house sits on a generous 3,455 sqft of land, offering comfort and privacy in a sought-after location. \n#house #interior #kualalumpur", "transcript": "", "brk": "Hook类型: 展示成果\n结构: 黄金地段豪宅外观/环境 → 核心户型与面积展示 → 空间私密性与居住亮点总结\n为什么火: 直击华人买家对吉隆坡核心区低密度、高隐私优质房产的置业向往\n改编角度: 聚焦华人青睐的KL热门华人区，突出“闹中取静+高私密性”打造尊贵感看房Vlog", "my": "想找三代同堂还能各自有隐私的大房子，其实不用到处去看那些挤在一起的排屋。\n\n很多人以为，要在吉隆坡附近找个真正宽敞又安静的家，只能买那种地段偏远、离机场超远的老旧村屋。\n\n其实不是这样的，真正关键的是要看地段跟建筑面积够不够大。\n\n第一点，看地段。\n\n一定要挑那种离机场只有大约 25 分钟车程的成熟区域，这样经常出国出差或者全家旅行时，出发才不会手忙脚乱，路上能省下非常多时间。\n\n第二点，看地段面积。\n\n地段一定要够宽敞，比如拥有 30,000 平方尺的超大面积，这样不仅四周有足够的隐私空间，平时周末家人聚在一起时，也有地方停车和活动。\n\n第三点，看建筑格局。\n\n建筑面积需要达到 8000 平方尺的独立洋房规格，三代人住进去每个人都能拥有独立的起居空间，不会互相打扰，真正住得舒服。\n\n以前很多家庭买房时，总是为了找一个既适合退休养老、又方便经常出国的房子到处奔波，最后往往只能买到空间不够用、隐私性很差的普通房子。\n\n现在换成 Nilai Spring 这种拥有 30,000 平方尺地段、8000 平方尺建筑的独立洋房，总价 RM3.8 million，生活品质直接提升，三代同堂也能住得十分宽敞自在。\n\n如果你也正在寻找这样一栋大面积的独立洋房，现在就直接私信我，了解这栋 Nilai Spring 独立洋房的详细资料。", "tags": "house, interior, kualalumpur", "bait": false, "type": "Carousel", "likes": 897, "comments": 26, "er": 5.34, "followers": 17285, "date": "2026-10-27", "url": "https://www.instagram.com/p/De_AX_sEgVy/", "video": false, "ratio": 0, "score": 5.64, "status": "未处理", "x": 2.8}, {"id": "DdWbmjXPP7U", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 RM7mil • 3-Storey Bungalow @ Taman Desa\n🏡 Comment “DESA” and I’ll DM you the full details!\n\n✨ 8,180 sq ft land | 8,201 sq ft built-up | Freehold\nRoom for the whole family, minutes from the city.\n🌟\n✅ Rebuilt bungalow\n✅ Top-floor pool & private lift\n✅ 8+1 bedrooms, 8 bathrooms\n✅ Guarded neighbourhood\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "", "brk": "Hook类型: 展示成果\n结构: 豪宅外观总览 → 核心奢华亮点 → 评论区留资互动\n为什么火: 直观展示700万豪宅的稀缺顶配设施，精准吸引高净值买家兴趣\n改编角度: 突出吉隆坡其他热门富人区的天价豪宅，强调私家泳池与电梯卖点诱导留言", "my": "你想在马来西亚找一间真正住得下三代同堂的独立洋房，其实真的不用去看那些密密麻麻的排屋。\n\n很多人以为，要在吉隆坡附近找一间够大、地段又好的独立洋房，一定要花上好几百万去买那些老旧还要自己花大钱重新装修的二手房。\n\n其实真的不是这样。\n\n第一点，看地段的时候，不要只看市中心有多热闹，要看它离机场和主要高速公路到底有多远。像 Nilai Spring 这里的独立洋房，车程大概二十五分钟就能直达机场，对经常需要出国出差或者三代同堂的家庭来说，这种交通距离才真正省时间。\n\n第二点，看空间的时候，不要只看房间有多少间，要看占地面积和建筑面积是不是真的够宽敞。这里的独立洋房有三万平方尺的地段，建筑面积也有八千平方尺，老人家在院子里散步、小孩在家里跑动，每个人都有属于自己的舒适空间。\n\n第三点，看价格的时候，不要被市场上的开价吓退，要看实际的调整和性价比。这间 Nilai Spring Luxury Bungalow 的价格已经从原本的 RM4.8 million 调整到了 RM3.8 million，实实在在地回落到了更合理的水平。\n\n以前很多家庭想找一间适合退休又适合全家人一起住的大房子，往往卡在找不到地段合适、空间又足够大、价格也合理的独立洋房，常常看到最后都很失望。\n\n换成对的方法以后，直接锁定 Nilai Spring 这种有三万平方尺地段、八千平方尺建筑的独立洋房，不仅三代同堂住得舒服，连经常出国出差的行程也变得非常顺路。\n\n如果你也想了解这间 RM3.8 million 的 Nilai Spring Luxury Bungalow 的完整资料，现在就私信我，我会把这间独立洋房的详细格局发给你。", "tags": "", "bait": true, "type": "Video", "likes": 422, "comments": 1, "er": 5.53, "followers": 7647, "date": "2026-09-16", "url": "https://www.instagram.com/p/DdWbmjXPP7U/", "video": true, "ratio": 0, "score": 5.56, "status": "未处理", "x": 1.3}, {"id": "DfBZ_vskvyn", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautiful house in Section 4, PJ, thoughtfully equipped with solar panels and EV & plug-in hybrid charging facilities. Featuring 4 bedrooms and 4 bathrooms, this house sits on a generous 7,786 sqft of land. View to offer!\n#house #interiors #home", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 稀缺好房展示 → 核心亮点拆解 → 引导私信出价\n为什么火: 精准踩中PJ成熟区大占地与新能源配置的双重升级需求\n改编角度: 突出老区稀缺大平地与太阳能充电桩的降本增效卖点", "my": "给你 30,000 平方尺地段，你会用来做什么？\n\n很多人以为，要在吉隆坡附近找一间真正安静、适合三代同堂的大房子，只能搬到很远的外坡，或者花大把时间重新装修。\n\n其实不是这样的，你需要的不是老旧排屋的翻新，而是一个空间足够大、设备齐全的高端独立洋房。\n\n第一点，看地段和空间。这间 Nilai Spring Luxury Bungalow 拥有 30,000 平方尺的地段和 8,000 平方尺的建筑面积，房间和活动空间非常充足，三代同堂居住也不会觉得拥挤。\n\n第二点，看日常出行的便利。项目距离机场只要约 25 分钟车程，对于经常需要出国、出差的家庭来说，省去了大把在路上奔波的时间。\n\n第三点，看长期的生活品质。这里是高端独立洋房项目，拥有宽敞的私人地段，不仅环境私密，也适合作为退休后的长期居住地，或者作为房产投资的选择。\n\n以前很多家庭在找退休房时，总是在市区的拥挤和郊区的便利之间纠结，看来看去都找不到满意的面积。\n\n换成这个独立洋房之后，不仅拥有了超大的私人空间，不管是三代人一起住还是经常出国都很方便。\n\n如果你也想在马来西亚找一间适合退休或投资的大房子，现在就私信我了解这间 Nilai Spring Luxury Bungalow 的详细信息。", "tags": "house, interiors, home", "bait": false, "type": "Carousel", "likes": 719, "comments": 42, "er": 4.4, "followers": 17285, "date": "2026-10-28", "url": "https://www.instagram.com/p/DfBZ_vskvyn/", "video": false, "ratio": 0, "score": 4.89, "status": "未处理", "x": 2.4}, {"id": "Dd0ujqqD6bN", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "Do Bangsar bungalows really make money? 🏡\n\n29 houses sold twice. Swipe for the numbers. Comment “BANGSAR” and I’ll send you the full 2024 & 2025 transaction list 👇\n\nJohnson Chuah • REN29484\n+60182072008\nPropNex Realty Sdn Bhd", "transcript": "", "brk": "Hook类型: 痛点直击+数据承诺\n结构: 抛出买房赚钱疑问 → 给出具体交易数据 → 引导私信获取完整名单\n为什么火: 用高净值地区真实成交数据制造稀缺性，结合评论区留资机制实现精准获客\n改编角度: 盘点华人热点区（如Mont Kiara或PJ）豪宅真实转售数据，评论区送完整清单", "my": "马来西亚的独立洋房，真的买得对吗？\n\n很多人以为，买高端房产只是为了面子，或者单纯当作一笔巨大的开销，觉得只要房子够大、地点够好，就一定能满足三代同堂的居住需求。\n\n其实不是这样的，真正懂房产的人，看中的不仅是当下的居住体验，更是长远的生活品质和资产配置。\n\n如果你正在找适合退休和三代同堂的家，这三个方向你必须要看。\n\n第一，看地段和面积。\n你要找的是那种土地面积足够大，建筑空间也宽敞的独立洋房，比如有 30,000 平方尺地段、8000 平方尺建筑的房子。\n这样的空间不仅三代人住在一起不会拥挤，每个人都有自己的私密角落，而且大面积的土地在马来西亚稀缺性很高。\n空间大、居住舒适，以后不管是自己住还是留给下一代，价值都在。\n\n第二，看交通和便利性。\n很多人买房只看市区，忽略了出行成本。\n其实你可以把眼光放在 Nilai 这样的地方，离机场只要约 25 分钟车程。\n对于经常出国出差的家庭或者喜欢房产投资的人来说，去机场方便，能省下不少路程上的时间。\n交通便利，生活节奏才不会被打乱。\n\n第三，看价格和性价比。\n买房最怕买在虚高的价格上。\n你需要去了解市场的真实行情，看看是不是已经做过价格调整的房源。\n就像 Nilai Spring Luxury Bungalow，现在的价格是 RM3.8 million，相比之前的 RM4.8 million 已经有了实实在在的调整。\n用更合理的总价买到更大的空间，这才是聪明做法。\n\n以前很多人看房，总是只看一两间就盲目做决定，结果买到不合适的户型，或者买贵了又转手困难。\n现在看房，大家会冷静对比地段、面积、交通和真实价格，选真正适合三代同堂和退休生活的项目。\n\n如果你想了解这间 RM3.8 million 的 Nilai Spring Luxury Bungalow 的详细资料，可以直接私信我。\n私信我，我把这间 30,000 平方尺地段的独立洋房资料发给你。", "tags": "", "bait": true, "type": "Carousel", "likes": 196, "comments": 49, "er": 3.2, "followers": 7647, "date": "2026-09-28", "url": "https://www.instagram.com/p/Dd0ujqqD6bN/", "video": false, "ratio": 0, "score": 4.49, "status": "未处理", "x": 1.1}, {"id": "Dey4sdUPpV2", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 RM2.5mil • 2-Storey Terrace @ Damansara Heights\n🏡 Comment “RENOVATED” and I’ll DM you the full details!\n\n✨ 1,722 sq ft land | 2,800 sq ft built-up | Freehold\nOne of the most interesting terraces I’ve seen, sold almost as you see it.\n🌟\n✅ 3+1 bedrooms, 3 bathrooms\n✅ Fully renovated, move-in ready\n✅ Sold with furniture & designer lights\n✅ Side gap for light & privacy\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "Ini adalah salah satu pilihan yang paling menarik yang saya lihat. Ia adalah pilihan yang berbicara dalam 2 tarikh di Daman Sarahit. Dalam perjalanan, 1,722 sqft di land, sekitar 2,800 sqft diberi. 3 bilik bilik, 3 bilik di jalan dan di jalan. Pilihan yang membuat setiap kawasan dengan kawasan yang kuat. Satu perjalanan yang mudah, mereka ada keadaan yang lebih kecil di antara rumah dan perah. Itu membawa lebih banyak keadaan dan membuat perasaan lebih berkembang daripada tarikh yang biasa. Hal tinggi memisi kehidupan kita ber Adams Miranda. Angkat keseluruhan awakbahn craving rabud panas ke dalam sanderaren blessit dan kunci drinks dengan Crop siang lewat dan noodle observed Beisit. Lagian tersebut siitä hanya yang awak lihat, kawasan, lagian tersיח yang adalah cawduan, jika kimse ya yakin, awak sayackonですね.", "brk": "Hook类型: 身份共鸣\n结构: 黄金地段标价 → 稀缺户型亮点 → 评论区引流留资\n为什么火: 瞄准白领买家痛点，全屋精装拎包入住激发购买欲\n改编角度: 聚焦吉隆坡热门华人区，突出“带家具全抛售”的省心优势", "my": "想要三代同堂住得舒服，你以为一定要在市区买几千万的大房子吗？\n\n很多人觉得，找一间够大、环境又舒服的退休房子，一定要花很多钱去市中心找，或者买回来还要花大笔钱重新装修。\n\n其实不是这样的，真正的原因是你没有看对地方，也没有找对这种空间大、隐私好的独立洋房。\n\n第一点，看地段的选择，你要找那种离机场只要二十五分钟车程的地方。\n\n这样你经常出国的时候，去机场非常方便，不用大清早赶路。\n\n第二点，看房子的面积，你要找那种地段有三万平方尺、建筑有八千平方尺的空间。\n\n这样三代同堂住在一起，每个人都有自己的活动空间，不会觉得拥挤。\n\n第三点，看房子的价格，你要找那种原价四百八十八万，现在已经调整到三百八十万的项目。\n\n这样你不仅省下一大笔钱，还能直接拥有一个真正的独立洋房。\n\n以前很多人想找退休房子，要么觉得市区太吵，要么觉得郊区不够方便，常常卡在不知道怎么选。\n\n换成这种大空间、好环境的独立洋房以后，不仅出国的交通时间变短了，全家人住在一起也更舒服了。\n\n如果你想了解这个位于尼莱的独立洋房项目，现在就直接私信我，我会把完整的项目资料发给你。", "tags": "", "bait": true, "type": "Video", "likes": 265, "comments": 8, "er": 3.57, "followers": 7647, "date": "2026-10-22", "url": "https://www.instagram.com/p/Dey4sdUPpV2/", "video": true, "ratio": 0, "score": 3.78, "status": "未处理", "x": 0.9}, {"id": "DeRfQErvkVZ", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 RM1.65mil • 2-Storey Endlot @ Medan Damansara\n🏡 Comment ”ENDLOT“ and I‘ll DM you the full details!\n\n✨ 2,680 sq ft land | 2,200 sq ft built-up | Freehold\nSpace to renovate, or rebuild it your way.\n🌟\n✅ 4+1 bedrooms, 3 bathrooms\n✅ Endlot with extra 10 ft land\n✅ Forest greenery nearby\n✅ Suitable for rebuild\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "An Enlod Freehold Terrace in Mena Naman-Sahara, next to Daman-Sahara Heights, with forest greenery along one side of the view. These two-storey homes seats on 2680 sqft of land, with 2200 sqft built-up, four plus one bedrooms and three bathrooms, facing northeast. Being an Enlod, you get an extra 10ft of land on the side, so the home feels open rather than squeezed in. Inside, the living and dining areas runs wide and open, with the kitchen at the back. Ini basisk betrayed dan terlalu tegang pergi. Tetapi untuk sesiapa yang nak mendapati dan memancing ulang atau mendapat sis prematurek kek dan posisi estarala40 kerja快 dan teruk sisak dalam hal masalah Shade untuk", "brk": "Hook类型: 痛点直击\n结构: 地段亮点 → 户型优势 → 改建潜力\n为什么火: 精准定位孟沙区稀缺双层排屋，突出超大土地与巨大改造空间\n改编角度: 聚焦大吉隆坡核心区老破大房源，放大其绝佳地段与重建后高溢价空间", "my": "你想找一间真正能三代同堂的独立洋房，其实不用越看越焦虑。\n\n很多人以为，要在吉隆坡附近找一间够大的洋房，一定要花好几千万，或者只能买那些空间狭窄的排屋。\n\n其实不是这样的，真正的问题在于，你没有看对地方。\n\n第一点，看地段。\n\n你要找的是离机场只要约二十五分钟车程的地方，这样你经常出国的时候，来回才不会觉得累。\n\n这个地段去哪里都很方便，不管是日常出门还是接送家人，都能省下很多在路上的时间。\n\n第二点，看空间。\n\n你要找的是那种地段有三万平方尺、建筑有八千平方尺的独立洋房，而不是普通的排屋。\n\n这样的空间，家里人多的时候才不会觉得挤，每个人都能有自己舒服的角落。\n\n第三点，看环境。\n\n你要找的是那种四周有足够隐私、住起来清静的独立洋房，适合全家人一起安安静静地退休。\n\n这间 Nilai Spring Luxury Bungalow 的原价是 RM4.8 million，现在价格是 RM3.8 million。\n\n以前很多家庭想找大房子，总觉得市区的选择太少，不然就是价钱超出预算太多。\n\n现在你有了这个选择，三万平方尺的地段和八千平方尺的建筑，刚好够三代人一起舒服地住下来。\n\n如果你想了解这间 Nilai Spring Luxury Bungalow 的完整资料，现在就私信我。", "tags": "", "bait": true, "type": "Video", "likes": 128, "comments": 42, "er": 2.22, "followers": 7647, "date": "2026-10-09", "url": "https://www.instagram.com/p/DeRfQErvkVZ/", "video": true, "ratio": 0, "score": 3.32, "status": "未处理", "x": 0.8}, {"id": "DeRHqeCEtMr", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautifully renovated house in Segambut, KL. Featuring 3 bedrooms and 2 bathrooms, this home sits on 1,227 sqft of land. DM me for more details or to arrange a viewing.\n\n#house #interior #dream", "transcript": "", "brk": "Hook类型: 展示成果\n结构: 靓丽外观展示 → 核心房屋参数 → 转化行动呼吁\n为什么火: 直观呈现高品质精装房源，精准吸引追求生活品质的购房者眼球。\n改编角度: 突出吉隆坡热门地段的“拎包入住”高性价比精装房，强化私信获取底价的紧迫感。", "my": "想在马来西亚找一间真正能三代同堂的独立洋房，其实真的不用看那些空间狭窄的排屋。\n\n很多人以为，要在吉隆坡附近买一间大房子，不仅要花心思去重新装修，还要忍受市区里拥挤的车位和局促的院子。\n\n其实不是这样的，你需要的是一间地段足够宽敞、环境真正安静的高端独立洋房。\n\n第一点，看地段和建筑面积。你需要选择像 Nilai Spring Luxury Bungalow 这样拥有 30,000 平方尺超大面积地段，以及 8000 平方尺宽敞建筑空间的独立洋房，这样三代同堂才不会觉得拥挤。\n\n第二点，看日常出行的便利性。你需要寻找距离机场只要大约 25 分钟车程的项目，这样经常需要出国出差的家庭，才能真正省下往返机场的时间。\n\n第三点，看整体居住的舒适度。你需要挑选环境开阔、私密性极高的豪宅项目，这样不仅退休生活能真正放松，全家人也能享受到属于自己的私人空间。\n\n以前很多家庭看房时，总是卡在市区房子太小、空间不够三代人一起住的问题上。\n\n换成这种超大面积的独立洋房以后，不仅长辈和孩子都有了舒适的活动空间，连经常出国出差的节奏也变得轻松很多。\n\n如果你也想了解这间位于 Nilai、地段 30,000 平方尺的 RM3.8 million 独立洋房，现在就直接私信我，我把项目的详细资料发给你。", "tags": "house, interior, dream", "bait": false, "type": "Carousel", "likes": 344, "comments": 23, "er": 2.12, "followers": 17285, "date": "2026-10-09", "url": "https://www.instagram.com/p/DeRHqeCEtMr/", "video": false, "ratio": 0, "score": 2.39, "status": "未处理", "x": 1.2}, {"id": "Deiu5M0kjdR", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautiful bungalow in Section 6, PJ. This well-maintained home features 3 ensuite bedrooms and sits on a generous 7,000 sqft plot, nestled in a peaceful and quiet neighbourhood. View to offer!\n\n#house #vintage #interiors", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 黄金地段实景展示 → 核心稀缺优势列举 → 号召行动预约看房\n为什么火: 精准定位成熟富人区独立洋房，直击高净值买家对大面积与私密性的核心需求。\n改编角度: 聚焦华人青睐的热门成熟区（如Mont Kiara或PJ），突出大占地与稀缺独栋卖点。", "my": "三代同堂要找一间真正住得下的大房子，真的没有那么容易。\n\n很多人以为，只要预算够高，随时都能在市中心找到一间满意的独立洋房。\n\n其实大部分人看了一圈下来才发现，市区里的地段越来越小，根本装不下全家人的空间需求。\n\n第一点，看地段的面积。\n\n你要找的是那种真正有足够土地面积的物业。\n\n就像 Nilai Spring 这间独立洋房，它拥有三万平方尺的地段。\n\n这么大的空间，不仅停车方便，平时家人在院子里活动也完全不会觉得拥挤。\n\n第二点，看建筑的实际尺寸。\n\n很多房子看起来很大，但内部格局不好，房间不够用。\n\n这里的建筑面积达到了八千平方尺。\n\n三代同堂住进去，每个人都能有自己的独立房间和私密空间。\n\n第三点，看周边的通勤便利度。\n\n买大房子不仅是为了居住舒适，还要考虑日常出行的方便。\n\n这个项目距离机场大约只要二十五分钟车程。\n\n对于经常需要出国或者出差的家庭来说，能省下不少在路上奔波的时间。\n\n以前很多家庭想找一间适合退休又兼顾出行的独立洋房，总是在市区和郊区之间纠结，最后找不到合适的。\n\n现在只要把目光放宽到 Nilai 地区，就能看到这间地段三万平方尺、建筑八千平方尺的优质选择。\n\n目前这间 Nilai Spring 独立洋房的价格是 RM3.8 million。\n\n如果你想了解这间房子的更多详情，现在可以直接私信我。\n\n我会把完整的资料发给你，带你实地看一看这间洋房的实际情况。", "tags": "house, vintage, interiors", "bait": false, "type": "Carousel", "likes": 333, "comments": 11, "er": 1.99, "followers": 17285, "date": "2026-10-16", "url": "https://www.instagram.com/p/Deiu5M0kjdR/", "video": false, "ratio": 0, "score": 2.12, "status": "未处理", "x": 1.0}, {"id": "DdbPzZGPv62", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "💰 RM15mil • Corner Bungalow @ Bangsar\n🏡 Comment “SQUASH” and I’ll DM you the full details!\n\n✨ 20,000 sq ft land | 8,000 sq ft built-up | Freehold\nA rare corner freehold bungalow with its own underground squash court.\n🌟\n✅ 6+3 bedrooms, 6 bathrooms\n✅ Underground squash court\n✅ Double-volume living room\n✅ Home gym & office\n\nJohnson Chuah • REN29484 | +60182072008 | PropNex Realty", "transcript": "Ada seafood ini di Bangsa Bangalau-Ajur Erário, sekejap dalam dunia terada di adunan ini di autong Frontel. Kiansi membelikan lepi functions dibaru Kekik two Story sama setelah disappointed bagi begikiran 6 Nikki sie sebesar punnya,HA akan memiliki overs marketplace dan semula ianya pandai untuk ia membangsak sesuai alaman dan kietion dan dah ber播어서 Re archaeologicalünde juga turun viene dan pejabat rumah di ether tersebut. Dam, benefik autokun实 Trail teacher wallpaper di sekitar tempat yang cemerka dengan lucu contagion di peribadi nomor. Savvick meng개fa kotantik di vilana, ini satu lagi pendekatan.quiera sampai selalu diberi. Dan psikod yang exert fashion bisa meny seated berniat. Kalau ada yang ingin tahu dengan hurting, sampaikan tetengah", "brk": "Hook类型: 身份共鸣\n结构: 豪宅视觉展示 → 核心稀缺卖点曝光 → 引导私信互动\n为什么火: 展示吉隆坡顶级富人区Bangsar罕见大宅及地下私家壁球场，精准吸引高净值买家。\n改编角度: 聚焦马来西亚其他黄金地段（如Mont Kiara）的独家特色豪宅，结合评论区留资诱饵。", "my": "想在马来西亚找一处真正适合三代同堂的退休大宅，其实不用花到上千万。\n\n很多人以为，要在吉隆坡附近买到空间足够大的独立洋房，预算一定要拉得很高，或者只能买到市区里挤来挤去的公寓。\n\n其实真正懂房产投资的人知道，只要选对方向，同样的预算在 Nilai 也能拥有完全不同的生活空间。\n\n第一步，先把目光从市中心的拥挤高楼移开。往南走一点到 Nilai 地区，这里的独立洋房拥有市中心完全给不了的超大土地面积。\n\n第二步，看房子的实际建筑面积和私密性。像 Nilai Spring Luxury Bungalow 这种项目，地段足足有三万平方尺，建筑面积也达到了八千平方尺。\n\n第三步，算一算整体的性价比与居住舒适度。这套高端独立洋房目前的售价是 RM3.8 million，相比原价 RM4.8 million 已经调整过，而且确认不再变动。\n\n以前想找这么大面积的物业，往往只能看那些价格高昂、位置局促的市区豪宅，一家人住在一起还是觉得不够宽敞。\n\n现在有了像 Nilai Spring 这样的大平地独立洋房，不仅三代人都有各自的活动空间，离机场也只要大约二十五分钟车程。\n\n如果你也想了解这栋 RM3.8 million 的独立洋房的详细资料，现在就私信我，我会把完整的信息发给你。", "tags": "", "bait": true, "type": "Video", "likes": 157, "comments": 1, "er": 2.07, "followers": 7647, "date": "2026-09-18", "url": "https://www.instagram.com/p/DdbPzZGPv62/", "video": true, "ratio": 0, "score": 2.09, "status": "未处理", "x": 0.5}, {"id": "DeOby47yUIQ", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Rare gem in Seputeh, KL, offering stunning Mid Valley City views from the backyard. This well-maintained home features a unique central courtyard that fills the house with natural light. Comes with 5 beds and 4 baths, nestled within a guarded neighbourhood. \n\nDm me for more details, pictures or viewing session.\n#house #vintage #backyard", "transcript": "", "brk": "", "my": "找一间三代同堂住得舒服的高端洋房，真的不用满吉隆坡到处去看。\n\n很多人以为，要在市区找一间空间够大、隐私好，又能随时跟家人聚在一起的独立洋房，预算肯定要拉到很高，或者只能买到设计很旧、空间很憋屈的老房子。\n\n其实不是这样的，关键在于你有没有看对地方。\n\n第一点，看地段的选择。\n把目光放在离机场大约 25 分钟车程的 Nilai 地区。\n这个位置不仅出入方便，经常出国或者需要接送机都很顺，而且避开了市中心的拥堵。\n买在这里，你可以直接拥有一个 30,000 平方尺的大地段。\n\n第二点，看建筑的实际空间。\n不需要委屈自己住在空间狭窄的高层公寓里。\n这里有 8000 平方尺的建筑面积，房间和活动区域非常充足。\n三代同堂住在一起，每个人都有自己的私人空间，长辈和小孩也能在宽敞的家里活动。\n\n第三点，看整体居住的舒适度。\n这是一间独立洋房，私密性极高，周围环境安静。\n买下来之后，你和家人可以直接搬进去享受退休生活，不用再花时间重新规划或者大肆装修。\n\n以前很多打算退休的家庭，为了找一间满意的大房子，花了好几个月看房，结果不是地段太吵，就是空间不够大。\n换成这种 30,000 平方尺地段、8000 平方尺建筑的 Nilai Spring Luxury Bungalow 之后，生活节奏慢了下来，每天都有足够的空间和家人待在一起。\n\n现在这间 Nilai Spring Luxury Bungalow 的价格是 RM3.8 million。\n如果你也想在马来西亚找一间适合三代同堂或者退休生活的高端独立洋房，直接私信我了解更多详情或者安排看房。", "tags": "house, vintage, backyard", "bait": false, "type": "Image", "likes": 160, "comments": 61, "er": 1.28, "followers": 17285, "date": "2026-10-08", "url": "https://www.instagram.com/p/DeOby47yUIQ/", "video": false, "ratio": 0, "score": 1.98, "status": "未处理", "x": 1.0}, {"id": "DdVJvZ-EsLX", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautiful home with extra land in PJU 1, Ara Damansara. Featuring 5beds 4baths, set on a generous 4,456 sqft land area within a gated & guarded community.\n\n#housetour #house #interiors", "transcript": "", "brk": "Hook类型: 视觉震撼/身份共鸣\n结构: 优质地段豪宅展示 → 核心参数与社区亮点 → 激发客户预约看房\n为什么火: 稀缺大面积土地与成熟社区的高品质呈现直击改善型买家痛点\n改编角度: 突出华人在意的大空间与风水地段，强化“市区难求带地豪宅”的稀缺感", "my": "找一间带大片土地的高端独立洋房，其实没有想象中那么难。\n\n很多人以为，要在马来西亚买到一间空间足够大、三代同堂住得舒服的房子，一定要去市中心看那些动辄千万的超级豪宅，或者要花很长时间慢慢排队找地段。\n\n其实不是这样的，关键在于你有没有看对地区。\n\n第一点，看重地段的独特性。\n你不需要盲目往市中心挤， Nilai Spring 这里的独立洋房，拥有高达三万平方尺的超大土地面积，建筑面积也达到了八千平方尺，空间非常开阔。\n这样大的面积，足够让家里的小孩和长辈都有各自舒适的活动空间，平时周末三代同堂聚在一起，也完全不会觉得拥挤。\n\n第二点，看重日常出行的便利性。\n很多买房的人会担心，买在稍微清静一点的地方，出远门会很不方便。\n但这里的独立洋房，距离机场只需要大约二十五分钟的车程，对于经常需要出国出差或者旅行的家庭来说，省下了非常多在路上的时间。\n\n第三点，看重资产本身的实际价值。\n这间 Nilai Spring Luxury Bungalow，目前的售价是 RM3.8 million，相比起原价 RM3.8 million 已经是非常明确且确定的价格，不需要再去猜测会不会有隐藏费用。\n用这个价格买到三万平方尺地段和八千平方尺建筑的独立洋房，在目前的市场上是非常少有的选择。\n\n以前很多家庭在找退休房或者大房子时，总是在市中心的拥挤和郊区的偏远之间纠结，最后找不到合适的。\n现在只要把目光放在 Nilai 这里的成熟独立洋房项目，既能满足三代同堂的居住需求，又能兼顾出行的便利。\n\n如果你也想在马来西亚找一间适合退休或者三代同堂居住的大房子，现在就可以直接私信我，了解这间 Nilai Spring Luxury Bungalow 的详细资料。", "tags": "housetour, house, interiors", "bait": false, "type": "Carousel", "likes": 197, "comments": 31, "er": 1.32, "followers": 17285, "date": "2026-09-16", "url": "https://www.instagram.com/p/DdVJvZ-EsLX/", "video": false, "ratio": 0, "score": 1.68, "status": "未处理", "x": 0.8}, {"id": "DeHAK7hD4ao", "tracker": "Property 竞对", "competitor": "johnsonchuahproperty", "caption": "Only 11 bungalows changed hands in Bukit Tunku from 2021 to 2026 📑\n\nTypical sale: RM14.6M for about 14,800 sqf of land.\nThe biggest: two lots on Jalan Bukit Tunku that went from RM16.35M (2008) to RM41.7M (2021) 🔥\n\nMore land or a newer home? In Bukit Tunku, that choice decides where you buy 🏡\n\nComment “TUNKU” and I’ll send you the full 2021–2026 sales report 📩\n\nJohnson Chuah • REN29484\n+60182072008\nPropNex Realty Sdn Bhd", "transcript": "", "brk": "Hook类型: 稀缺数据与高净值资产悬念\n结构: 核心稀缺数据 → 标杆案例对比 → 留言索取完整报告\n为什么火: 用独家高端成交数据制造稀缺感，精准钓出高净值买家\n改编角度: 盘点华人圈顶级富人区近年稀缺成交，引导私信发深度报告", "my": "很多人以为，在吉隆坡买大独立洋房，只有市中心那些老牌富人区才是唯一的选择。\n\n大家都觉得，要找这种超大面积的房子，必须接受高昂的价格，或者只能买到那些屋龄很老、需要花大笔钱重新装修的旧房子。\n\n其实不是这样的，真正懂看的人，现在都在看 Nilai 的高端独立洋房项目。\n\n第一点，看地的面积，这里的地段有 30000 平方尺，建筑面积也有 8000 平方尺，空间非常大，三代同堂住在一起每个人都有自己的房间，完全不会觉得拥挤。\n\n第二点，看地点的便利性，这个项目离机场只要大约 25 分钟车程，对于经常需要出国出差或者旅行的家庭来说，节省了很多在路上塞车的时间。\n\n第三点，看整体的性价比，这个 Nilai Spring Luxury Bungalow 的原价是 RM4.8 million，现在已经调整到 RM3.8 million，可以用更合理的预算买到更大更新的独栋空间。\n\n以前很多打算在马来西亚退休的家庭，花了很多时间在市中心找地找房，最后不是面积太小，就是价格超出预算。\n\n现在用这个新的选择，不仅能拥有 30000 平方尺的超大土地，还能让家人住得更舒服，不用再为了市中心的旧房子妥协。\n\n如果你也想了解这个项目，现在就私信我，我会把详细的资料发给你。", "tags": "", "bait": true, "type": "Carousel", "likes": 82, "comments": 15, "er": 1.27, "followers": 7647, "date": "2026-10-05", "url": "https://www.instagram.com/p/DeHAK7hD4ao/", "video": false, "ratio": 0, "score": 1.66, "status": "未处理", "x": 0.4}, {"id": "DeLMRv2kmIE", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Beautiful bungalow in SS1, Petaling Jaya. This house comes with 4beds 3baths, set on a generous 6,140sqft land. The price is negotiable for serious buyers.\n#house #vintage #petalingjaya", "transcript": "", "brk": "Hook类型: 展示成果\n结构: 黄金地段独立屋外观 → 核心户型与超大土地面积 → 价格可议引导私信\n为什么火: 稀缺地段大平层独栋加上实景直观展示，精准吸引高净值买家。\n改编角度: 突出“捡漏”或“稀缺性”，展示PJ区老钱风独栋的改造潜力。", "my": "想在马来西亚找一处三代同堂还能随时出国的大房子，其实不用越看越迷茫。\n\n很多人以为，买高端独立洋房一定要花到 RM4.8 million 那么夸张。\n\n其实不是这样的，真正关键的是看地段和空间是不是完全符合退休和家庭的需求。\n\n第一，先看地段。要选离机场只要约 25 分钟车程的地方，这样经常出国和出差的家庭，往返机场才不会觉得累。\n\n第二，看土地和建筑面积。要找像 30,000 平方尺地段加上 8000 平方尺建筑这样的大空间，三代同堂住在一起才不会拥挤。\n\n第三，看价格调整。现在 Nilai Spring Luxury Bungalow 已经从原价 RM4.8 million 调整到 RM3.8 million，直接降价，确认不再变动，这时候看房更清楚。\n\n以前看房，总是觉得好地段的大房子价格太高，根本没办法下手。\n\n现在看房，有了 RM3.8 million 的明确价格和超大空间，退休生活和家庭居住一次就能到位。\n\n如果你也想了解 Nilai Spring Luxury Bungalow 的详细资料，现在就私信我，我把这栋 30,000 平方尺地段的独立洋房资料发给你。", "tags": "house, vintage, petalingjaya", "bait": false, "type": "Carousel", "likes": 220, "comments": 22, "er": 1.4, "followers": 17285, "date": "2026-10-07", "url": "https://www.instagram.com/p/DeLMRv2kmIE/", "video": false, "ratio": 0, "score": 1.65, "status": "未处理", "x": 0.8}, {"id": "Dd7tYP3ygyN", "tracker": "Property 竞对", "competitor": "aisyahrealtor", "caption": "Classic bungalow house in Section 11, PJ. This charming house comes with 4beds 3baths, sitting on a generous 7,280sqft land. A rare opportunity in a sought-after established neighbourhood.\n\n#house #vintage", "transcript": "", "brk": "Hook类型: 稀缺资源与身份共鸣\n结构: 黄金地段老洋房展示 → 核心数据与户型拆解 → 稀缺性与圈层价值暗示\n为什么火: 精准击中高净值买家对PJ成熟社区独栋豪宅的情怀与终极置业向往\n改编角度: 聚焦传统富人区独栋老宅，主打“卖一套少一套”的稀缺情怀与资产传承价值", "my": "在马来西亚找一间三代同堂的独立洋房，很多人以为只有老旧或者地点太偏僻的选择。\n\n大多数人看房时，都觉得市中心的老洋房虽然地点好，但地段太小不够用，想要大空间就只能去到很远的地方。\n\n其实不是这样的，真正适合退休和三代同堂的房子，不需要在空间和地点上做妥协。\n\n第一，看地段的面积。选择拥有三万平方尺超大地点的独立洋房，让父母有地方种花，孙子有地方跑动，全家人生活在同一个屋檐下也有足够的隐私。\n\n第二，看建筑的实用率。选择拥有八千平方尺建筑面积的洋房，不管是房间数量还是客厅空间，都能满足全家人的日常需求，不用担心人多拥挤。\n\n第三，看出行的便利性。选择距离机场只要约二十五分钟车程的项目，方便经常需要出国或者家庭旅行的成员，省下长途奔波的时间。\n\n以前很多家庭找大房子时，总是在市中心的小面积和郊区的交通不便之间纠结，看来看去都找不到两全其美的选择。\n\n找到对的项目以后，不仅拥有了三万平方尺地段和八千平方尺建筑，还能兼顾到退休生活和出国的便利。\n\n现在这间 Nilai Spring 独立洋房的售价是 RM3.8 million，如果你正在找这样规格的房子，点击私信我了解更多详情。", "tags": "house, vintage", "bait": false, "type": "Image", "likes": 133, "comments": 15, "er": 0.86, "followers": 17285, "date": "2026-10-01", "url": "https://www.instagram.com/p/Dd7tYP3ygyN/", "video": false, "ratio": 0, "score": 1.03, "status": "未处理", "x": 0.5}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://tqlgewelouruvjagaqzk.supabase.co';
+const ANON = 'sb_publishable_vLma28E5OxZh2Pd7TtNhng_vE0ADdC2';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:50 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
